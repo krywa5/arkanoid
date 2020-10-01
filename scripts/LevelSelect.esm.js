@@ -44,13 +44,13 @@ class LevelSelect extends Common {
 	}
 
 	loadLevel(level) {
-		if (media.spriteSheet && media.backgroundMusic) {
+		if (media.spriteImage && media.backgroundMusic) {
 			game.playLevel(level);
 			return;
 		}
 
-		if (!media.diamondsSprite) {
-			media.diamondsSprite = loader.loadImage('images/spritessheet.png');
+		if (!media.spriteImage) {
+			media.spriteImage = loader.loadImage('images/spritessheet.png');
 		}
 
 		if (!media.backgroundMusic) {

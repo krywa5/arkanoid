@@ -1,12 +1,14 @@
 import { canvas } from './Canvas.esm.js';
 
 export class Sprite {
-	constructor(x, y, width, height, spritesImage, numberOfSprites = 1, offset = {x: 0, y: 0}) {
+	constructor(spriteX, spriteY, width, height, spritesImage, x, y, numberOfSprites = 1, offset = { x: 0, y: 0 }) {
 		this.alpha = 255;
 		this.height = height;
 		this.numberOfSprites = numberOfSprites;
-		this.offset = {...offset};
+		this.offset = { ...offset };
 		this.spritesImage = spritesImage;
+		this.spriteStartX = spriteX;
+		this.spriteStartY = spriteY;
 		this.width = width;
 		this.x = x;
 		this.y = y;
@@ -21,20 +23,45 @@ export class Sprite {
 			canvas.context.globalAlpha = this.alpha / 255;
 		}
 
+		const startPointToDrawX = numberOfSprites * this.width + this.spriteStartX;
+
 		canvas.context.drawImage(
 			this.spritesImage,
-			numberOfSprites * this.width,
-			0,
+			startPointToDrawX,
+			this.spriteStartY,
 			this.width,
 			this.height,
 			this.x + this.offset.x,
 			this.y + this.offset.y,
 			this.width * ratio,
-			this.height * ratio
+			this.height * ratio,
 		);
 
 		if (this.alpha !== 255) {
 			canvas.context.globalAlpha = 1;
 		}
+	}
+
+	checkCollisionWithAnotherSprite(vector, anotherSprite) {
+		const [collisionPointX, collistionPointY] = this.getProperlyCollisionPoints(vector);
+
+		if (
+			anotherSprite.x < collisionPointX &&
+			collisionPointX < anotherSprite.x + anotherSprite.width &&
+			anotherSprite.y < collistionPointY &&
+			collistionPointY < anotherSprite.y + anotherSprite.height
+		) {
+			return true;
+		}
+
+		return false;
+	}
+
+	getProperlyCollisionPoints(vector) {
+		const collisionPointX = vector.dx < 0 ? this.x : this.x + this.width;
+
+		const collistionPointY = vector.dy < 0 ? this.y : this.y + this.height;
+
+		return [collisionPointX, collistionPointY];
 	}
 }

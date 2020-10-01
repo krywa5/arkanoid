@@ -6,6 +6,11 @@ import { media } from './Media.esm.js';
 import { resultScreen } from './ResultScreen.esm.js';
 import { userData } from './UserData.esm.js';
 import { mainMenu } from './MainMenu.esm.js';
+import { Sprite } from './Sprite.esm.js';
+import { Paddle, PADDLE_SPEED } from './Paddle.esm.js';
+import { keyboardController, KEY_CODE_LEFT, KEY_CODE_PAUSE, KEY_CODE_RIGHT } from './KeyboardController.esm.js';
+import { Ball } from './Ball.esm.js';
+
 
 
 class Game extends Common {
@@ -15,6 +20,11 @@ class Game extends Common {
 
 	playLevel(level) {
 		window.removeEventListener(DATALOADED_EVENT_NAME, this.playLevel);
+
+		this.background = new Sprite(0, 33, 800, 450, media.spriteImage, 0, 0);
+		this.paddle = new Paddle();
+		this.ball = new Ball();
+		this.gameState = { isGamePaused: false };
 		// this.gameState = new GameState();
 		this.changeVisibilityScreen(canvas.element, VISIBLE_SCREEN);
 		this.changeVisibilityScreen(mainMenu.miniSettingsLayerElement, VISIBLE_SCREEN);
@@ -24,59 +34,71 @@ class Game extends Common {
 	}
 
 	animate() {
+		this.ball.moveAndCheckCollision();
+		this.handleKeyboardClick();
+		this.checkCollisionBallWithPaddle();
+		this.drawSprites();
 		this.checkEndOfGame();
 	}
 
+	handleKeyboardClick() {
+
+		const { clickedKey: key } = keyboardController;
+
+		if (!key) {
+			return;
+		}
+
+		if (key === KEY_CODE_PAUSE) {
+			this.gameState.isGamePaused = true;
+			keyboardController.clickedKey = null;
+			return;
+		}
+
+		if (!this.gameState.isGamePaused && key === KEY_CODE_LEFT) {
+			for (let i = PADDLE_SPEED; this.paddle.movePlayerLeft() && i; i--);
+			keyboardController.clickedKey = null;
+			return;
+		}
+
+		if (!this.gameState.isGamePaused && key === KEY_CODE_RIGHT) {
+			for (let i = PADDLE_SPEED; this.paddle.movePlayerRight() && i; i--);
+			keyboardController.clickedKey = null;
+			return;
+		}
+	}
+
+	drawSprites() {
+		this.background.draw(0, 1.25);
+		this.ball.draw();
+		this.paddle.draw();
+	}
 
 	checkEndOfGame() {
-		if (!this.gameState.getLeftMovement() && !this.gameState.getIsMoving() && !this.gameState.getIsSwaping()) {
+		if (this.ball.hadHitBottomEdge()) {
 			media.isInLevel = false;
 			media.stopBackgroundMusic();
-			const isPlayerWinner = this.gameState.isPlayerWinner();
-			const currentLevel = Number(this.gameState.level);
-
-			if (isPlayerWinner && gameLevels[currentLevel]) {
-				if (!userData.checkAvailabilityLevel(currentLevel + 1)) {
-					userData.addNewLevel(currentLevel + 1);
-				}
-			}
-
-			if (userData.getHighScores(currentLevel) < this.gameState.getPlayerPoints()) {
-				userData.setHighScore(currentLevel, this.gameState.getPlayerPoints());
-			}
-
-			resultScreen.viewResultScreen(isPlayerWinner, this.gameState.getPlayerPoints(), currentLevel);
+			resultScreen.viewResultScreen(true);
 		} else {
 			this.animationFrame = window.requestAnimationFrame(() => this.animate());
 		}
 	}
 
-	swap(firstDiamond, secondDiamond) {
-		[
-			firstDiamond.kind,
-			firstDiamond.alpha,
-			firstDiamond.match,
-			firstDiamond.x,
-			firstDiamond.y,
-			secondDiamond.kind,
-			secondDiamond.alpha,
-			secondDiamond.match,
-			secondDiamond.x,
-			secondDiamond.y,
-		] = [
-				secondDiamond.kind,
-				secondDiamond.alpha,
-				secondDiamond.match,
-				secondDiamond.x,
-				secondDiamond.y,
-				firstDiamond.kind,
-				firstDiamond.alpha,
-				firstDiamond.match,
-				firstDiamond.x,
-				firstDiamond.y,
-			];
+	checkCollisionBallWithPaddle() {
+		const { dx, dy } = this.ball;
 
-		this.gameState.setIsMoving(true);
+		if (dy < 0) {
+			return;
+		}
+
+		const vector = {
+			dx,
+			dy,
+		};
+
+		if (this.ball.checkCollisionWithAnotherSprite(vector, this.paddle)) {
+			this.ball.dy = -(Math.floor(Math.random() * 3) + 3);
+		};
 	}
 }
 
