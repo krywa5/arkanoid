@@ -5,7 +5,7 @@ import { media } from './Media.esm.js';
 const PADDLE_START_SPRITE_X = 129;
 export const PADDLE_HEIGHT = 23;
 const PADDLE_WIDTH = 102;
-export const PADDLE_SPEED = 10;
+export const PADDLE_SPEED = 20;
 
 export class Paddle extends Sprite {
     constructor() {
