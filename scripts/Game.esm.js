@@ -37,13 +37,16 @@ class Game extends Common {
 	}
 
 	animate() {
-		this.handleKeyboardClick();
-		if (!this.gameState.isGamePaused) {
-			this.ball.moveAndCheckCollision(this.gameState.getGameBoard());
-			this.checkCollisionBallWithPaddle();
-		}
-		this.drawSprites();
-		this.checkEndOfGame();
+		const FPSLimit = 60;
+		setTimeout(() => {
+			this.handleKeyboardClick();
+			if (!this.gameState.isGamePaused) {
+				this.ball.moveAndCheckCollision(this.gameState.getGameBoard());
+				this.checkCollisionBallWithPaddle();
+			}
+			this.drawSprites();
+			this.checkEndOfGame();
+		}, 1000 / FPSLimit);
 	}
 
 	handleKeyboardClick() {
