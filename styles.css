@@ -77,11 +77,11 @@ body {
 }
 
 .start-screen__button--is-settings {
-	background-image: url("/images/button-settings.png");
+	background-image: url("./images/button-settings.png");
 }
 
 .start-screen__button--is-settings:hover {
-	background-image: url("/images/button-settings-hover.png");
+	background-image: url("./images/button-settings-hover.png");
 }
 
 .level-select {
