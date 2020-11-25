@@ -1,6 +1,6 @@
 class UserData {
 	constructor() {
-		if (!localStorage.length) {
+		if (!localStorage.getItem('1')) {
 			localStorage.setItem('1', JSON.stringify({ active: true }));
 		}
 	}
